@@ -3,11 +3,15 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
 	"os"
 	"snippetbox/internal/models"
+	"time"
 )
 
 type config struct {
@@ -25,26 +29,35 @@ func (c *config) init() {
 var Config = &config{}
 
 type application struct {
-	db            *sql.DB
-	errorLog      *log.Logger
-	infoLog       *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func (app *application) init() {
-	var err error
+	var (
+		db  *sql.DB
+		err error
+	)
 	app.infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	app.errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	if app.db, err = openDb(Config.dsn); err != nil {
-		app.errorLog.Fatal(err)
-	}
-	app.snippets = &models.SnippetModel{DB: app.db}
-	if app.templateCache, err = newTemplateCache(); err != nil {
+	if db, err = openDb(Config.dsn); err != nil {
 		app.errorLog.Fatal(err)
 	}
 
+	app.snippets = &models.SnippetModel{DB: db}
+	if app.templateCache, err = newTemplateCache(); err != nil {
+		app.errorLog.Fatal(err)
+	}
+	app.formDecoder = form.NewDecoder()
+
+	app.sessionManager = scs.New()
+	app.sessionManager.Store = mysqlstore.New(db)
+	app.sessionManager.Lifetime = 12 * time.Hour
 }
 
 func openDb(dsn string) (*sql.DB, error) {
