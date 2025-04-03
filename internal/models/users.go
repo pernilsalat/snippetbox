@@ -62,5 +62,9 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) Exists(id int) (bool, error) {
-	return false, nil
+	var exists bool
+	sqlStatement := `SELECT COUNT(*) FROM users WHERE id = ?`
+	err := m.DB.QueryRow(sqlStatement, id).Scan(&exists)
+
+	return exists, err
 }
