@@ -32,6 +32,7 @@ type application struct {
 	errorLog       *log.Logger
 	infoLog        *log.Logger
 	snippets       *models.SnippetModel
+	users          *models.UserModel
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
@@ -50,6 +51,8 @@ func (app *application) init() {
 	}
 
 	app.snippets = &models.SnippetModel{DB: db}
+	app.users = &models.UserModel{DB: db}
+
 	if app.templateCache, err = newTemplateCache(); err != nil {
 		app.errorLog.Fatal(err)
 	}
