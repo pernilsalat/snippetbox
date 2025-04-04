@@ -49,7 +49,7 @@ func MaxChars(value string, max int) bool {
 	return utf8.RuneCountInString(strings.TrimSpace(value)) <= max
 }
 
-func ValueIn(value int, permitted ...int) bool {
+func ValueIn[T comparable](value T, permitted ...T) bool {
 	for _, v := range permitted {
 		if value == v {
 			return true
