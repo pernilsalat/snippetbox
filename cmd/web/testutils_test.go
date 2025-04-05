@@ -87,7 +87,7 @@ func newTestServer(t *testing.T, h http.Handler) *testServer {
 	ts := httptest.NewTLSServer(h)
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return nil
+		t.Fatal(err)
 	}
 
 	ts.Client().Jar = jar
