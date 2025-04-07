@@ -1,15 +1,16 @@
-package main
+package ui
 
 import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
 	"snippetbox/internal/models"
-	"snippetbox/ui"
+	"snippetbox/web"
 	"time"
 )
 
-type templateData struct {
+// TemplateData TODO: remove dependency on models package
+type TemplateData struct {
 	CurrentYear     int
 	Snippet         *models.Snippet
 	Snippets        []*models.Snippet
@@ -29,10 +30,10 @@ func humanDate(t time.Time) string {
 
 var functions = template.FuncMap{"humanDate": humanDate}
 
-func newTemplateCache() (map[string]*template.Template, error) {
+func NewTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl.html")
+	pages, err := fs.Glob(web.Files, "html/pages/*.tmpl.html")
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 			page,
 		}
 
-		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, files...)
+		ts, err := template.New(name).Funcs(functions).ParseFS(web.Files, files...)
 		if err != nil {
 			return nil, err
 		}
