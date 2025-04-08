@@ -6,10 +6,11 @@ import (
 	"github.com/justinas/alice"
 	"github.com/justinas/nosurf"
 	"net/http"
+	"snippetbox/internal/modules/user/repository"
 	"snippetbox/internal/platform"
 )
 
-func secureHeaders(next http.Handler) http.Handler {
+func SecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-security-policy",
 			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
@@ -62,6 +63,7 @@ func RequireAuthentication(app *Application) alice.Constructor {
 }
 
 func Authenticate(app *Application) alice.Constructor {
+	ur := repository.NewUser(app.DB)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -70,7 +72,7 @@ func Authenticate(app *Application) alice.Constructor {
 				next.ServeHTTP(w, r)
 				return
 			}
-			exists, err := app.Users.Exists(id)
+			exists, err := ur.Exists(id)
 			if err != nil {
 				app.ServerError(w, err)
 				return
@@ -105,5 +107,5 @@ func Protected(app *Application) alice.Chain {
 }
 
 func Standard(app *Application) alice.Chain {
-	return alice.New(RecoverPanic(app), LogRequest(app), secureHeaders)
+	return alice.New(RecoverPanic(app), LogRequest(app), SecureHeaders)
 }

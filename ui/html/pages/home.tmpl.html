@@ -1,14 +1,14 @@
 {{define "title"}}Home{{end}}
 {{define "main"}}
 <h2>Latest Snippets</h2>
-    {{if .Snippets}}
+    {{if .List}}
         <table>
             <tr>
                 <th>Title</th>
                 <th>Created</th>
                 <th>ID</th>
             </tr>
-            {{range .Snippets}}
+            {{range .List}}
             <tr>
             <td><a href='/snippet/view/{{.ID}}'>{{.Title}}</a></td>
                 <td>{{humanDate .Created}}</td>

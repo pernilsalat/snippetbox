@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"net/http"
+	"snippetbox/internal/modules"
 	"snippetbox/internal/platform"
 	"snippetbox/internal/platform/database/mysql"
 	"snippetbox/internal/platform/web"
@@ -11,7 +12,6 @@ import (
 
 func init() {
 	platform.Config.Init()
-	//platform.App.Init()
 }
 
 func main() {
@@ -27,10 +27,13 @@ func main() {
 		platform.ErrorLog.Fatal(err)
 	}
 
+	modules.Init(app)
+
+	standard := web.Standard(app)
 	srv := &http.Server{
 		Addr:         platform.Config.Addr,
 		ErrorLog:     app.ErrorLog,
-		Handler:      platform.App.Routes(),
+		Handler:      standard.Then(app.Router),
 		TLSConfig:    platform.Config.TlsConfig,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

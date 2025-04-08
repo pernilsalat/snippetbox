@@ -4,16 +4,15 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
-	"snippetbox/internal/models"
-	"snippetbox/web"
+	"snippetbox/ui"
 	"time"
 )
 
 // TemplateData TODO: remove dependency on models package
 type TemplateData struct {
 	CurrentYear     int
-	Snippet         *models.Snippet
-	Snippets        []*models.Snippet
+	Model           any
+	List            any
 	Form            any
 	Flash           string
 	IsAuthenticated bool
@@ -33,7 +32,7 @@ var functions = template.FuncMap{"humanDate": humanDate}
 func NewTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := fs.Glob(web.Files, "html/pages/*.tmpl.html")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl.html")
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +46,7 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 			page,
 		}
 
-		ts, err := template.New(name).Funcs(functions).ParseFS(web.Files, files...)
+		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, files...)
 		if err != nil {
 			return nil, err
 		}

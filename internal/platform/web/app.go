@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"snippetbox/internal/platform"
+	"snippetbox/internal/platform/database"
 	"snippetbox/internal/ui"
 	"time"
 )
@@ -26,6 +27,7 @@ type Application struct {
 	TemplateCache  map[string]*template.Template
 	FormDecoder    *form.Decoder
 	SessionManager *scs.SessionManager
+	DB             database.DB
 }
 
 func NewApplication(db *sql.DB) (*Application, error) {
@@ -45,6 +47,7 @@ func NewApplication(db *sql.DB) (*Application, error) {
 		TemplateCache:  templateCache,
 		FormDecoder:    form.NewDecoder(),
 		SessionManager: sessionManager,
+		DB:             db,
 	}, nil
 }
 
