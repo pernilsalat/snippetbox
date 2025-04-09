@@ -96,7 +96,7 @@ func (app *Application) NewTemplateData(r *http.Request) *ui.TemplateData {
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.SessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: app.IsAuthenticated(r),
-		UserName:        app.GetCurrentUser(r).Name,
+		User:            app.GetCurrentUser(r),
 		CSRFToken:       nosurf.Token(r),
 	}
 }
@@ -129,7 +129,7 @@ func (app *Application) GetCurrentUser(r *http.Request) *domain.UserModel {
 	user, ok := r.Context().Value(platform.UserContextKey).(*domain.UserModel)
 
 	if !ok {
-		return &domain.UserModel{}
+		return nil
 	}
 	return user
 }

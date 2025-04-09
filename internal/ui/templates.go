@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"snippetbox/internal/modules/user/domain"
 	"snippetbox/ui"
 	"time"
 )
@@ -15,7 +16,7 @@ type TemplateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
-	UserName        string
+	User            *domain.UserModel
 	CSRFToken       string
 }
 

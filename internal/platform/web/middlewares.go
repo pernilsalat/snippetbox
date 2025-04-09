@@ -54,6 +54,7 @@ func RequireAuthentication(app *Application) alice.Constructor {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !app.IsAuthenticated(r) {
+				app.SessionManager.Put(r.Context(), "redirectAfterLogin", r.RequestURI)
 				http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 				return
 			}

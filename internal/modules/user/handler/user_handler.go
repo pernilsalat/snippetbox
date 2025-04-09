@@ -79,10 +79,13 @@ func (h *UserHandler) UserLoginPost(w http.ResponseWriter, r *http.Request) {
 		h.app.ServerError(w, err)
 		return
 	}
-
+	redirectPath := h.app.SessionManager.PopString(r.Context(), "redirectAfterLogin")
+	if redirectPath == "" {
+		redirectPath = "/snippet/create"
+	}
 	h.app.SessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+	http.Redirect(w, r, redirectPath, http.StatusSeeOther)
 }
 
 func (h *UserHandler) UserLogoutPost(w http.ResponseWriter, r *http.Request) {
@@ -95,4 +98,14 @@ func (h *UserHandler) UserLogoutPost(w http.ResponseWriter, r *http.Request) {
 	h.app.SessionManager.Put(r.Context(), "flash", "Logged out successfully")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *UserHandler) UserView(w http.ResponseWriter, r *http.Request) {
+	td := h.app.NewTemplateData(r)
+	if td.User == nil {
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	h.app.Render(w, http.StatusOK, "account.tmpl.html", td)
 }
