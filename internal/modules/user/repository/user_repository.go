@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
+	"snippetbox/internal/modules/user/domain"
 	"snippetbox/internal/platform/database"
 	"strings"
 )
@@ -71,4 +72,19 @@ func (m *UserRepository) Exists(id int) (bool, error) {
 	err := m.DB.QueryRow(sqlStatement, id).Scan(&exists)
 
 	return exists, err
+}
+
+func (m *UserRepository) Get(id int) (*domain.UserModel, error) {
+	sqlStatement := `SELECT id, name, email, created FROM users WHERE id = ?`
+	row := m.DB.QueryRow(sqlStatement, id)
+	u := &domain.UserModel{}
+
+	err := row.Scan(&u.Id, &u.Name, &u.Email, &u.Created)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, database.ErrNoRecord
+	} else if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }

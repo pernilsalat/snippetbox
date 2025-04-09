@@ -5,8 +5,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"snippetbox/internal/modules/snippet/domain"
-	"snippetbox/internal/modules/snippet/repository"
 	"snippetbox/internal/modules/snippet/service"
+	"snippetbox/internal/platform/database"
 	"snippetbox/internal/platform/web"
 	"snippetbox/internal/validator"
 	"strconv"
@@ -46,7 +46,7 @@ func (h *SnippetHandler) SnippetView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	snippet, err := h.service.SnippetRead(id)
-	if errors.Is(err, repository.ErrNoRecord) {
+	if errors.Is(err, database.ErrNoRecord) {
 		h.app.NotFound(w)
 		return
 	} else if err != nil {
@@ -68,13 +68,14 @@ func (h *SnippetHandler) SnippetCreateView(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *SnippetHandler) SnippetCreatePost(w http.ResponseWriter, r *http.Request) {
+	userId := h.app.SessionManager.GetInt(r.Context(), "authenticatedUserID")
 	var form domain.SnippetCreateForm
 	if err := h.app.DecodePostForm(r, &form); err != nil {
 		h.app.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
-	id, err := h.service.SnippetCreate(&form)
+	id, err := h.service.SnippetCreate(&form, userId)
 	if errors.Is(err, validator.ErrInvalidForm) {
 		td := h.app.NewTemplateData(r)
 		td.Form = form
@@ -87,5 +88,5 @@ func (h *SnippetHandler) SnippetCreatePost(w http.ResponseWriter, r *http.Reques
 	}
 
 	h.app.SessionManager.Put(r.Context(), "flash", "Snippet created successfully")
-	http.Redirect(w, r, "/snippet/view?id="+strconv.Itoa(id), http.StatusSeeOther)
+	http.Redirect(w, r, "/snippet/view/"+strconv.Itoa(id), http.StatusSeeOther)
 }

@@ -2,12 +2,14 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/justinas/alice"
 	"github.com/justinas/nosurf"
 	"net/http"
 	"snippetbox/internal/modules/user/repository"
 	"snippetbox/internal/platform"
+	"snippetbox/internal/platform/database"
 )
 
 func SecureHeaders(next http.Handler) http.Handler {
@@ -72,13 +74,14 @@ func Authenticate(app *Application) alice.Constructor {
 				next.ServeHTTP(w, r)
 				return
 			}
-			exists, err := ur.Exists(id)
-			if err != nil {
+			//exists, err := ur.Exists(id)
+			user, err := ur.Get(id)
+			if !errors.Is(err, database.ErrNoRecord) && err != nil {
 				app.ServerError(w, err)
 				return
-			}
-			if exists {
+			} else if user != nil {
 				ctx := context.WithValue(r.Context(), platform.IsAuthenticatedContextKey, true)
+				ctx = context.WithValue(ctx, platform.UserContextKey, user)
 				r = r.WithContext(ctx)
 			}
 

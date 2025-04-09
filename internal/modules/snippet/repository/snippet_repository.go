@@ -8,7 +8,7 @@ import (
 )
 
 type ISnippetRepository interface {
-	Insert(title, content string, expires int) (int, error)
+	Insert(title, content string, expires, userId int) (int, error)
 	Get(id int) (*domain.SnippetModel, error)
 	Latest() ([]*domain.SnippetModel, error)
 }
@@ -23,11 +23,11 @@ func NewSnippet(db database.DB) *SnippetRepository {
 	}
 }
 
-func (r *SnippetRepository) Insert(title, content string, expires int) (int, error) {
-	sqlStatement := `INSERT INTO snippets (title, content, created, expires)
-		VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
+func (r *SnippetRepository) Insert(title, content string, expires, userId int) (int, error) {
+	sqlStatement := `INSERT INTO snippets (title, content, created, expires, user_id)
+		VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY), ?)`
 
-	result, err := r.DB.Exec(sqlStatement, title, content, expires)
+	result, err := r.DB.Exec(sqlStatement, title, content, expires, userId)
 	if err != nil {
 		return 0, err
 	}
@@ -48,7 +48,7 @@ func (r *SnippetRepository) Get(id int) (*domain.SnippetModel, error) {
 
 	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrNoRecord
+		return nil, database.ErrNoRecord
 	} else if err != nil {
 		return nil, err
 	}

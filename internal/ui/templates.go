@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// TemplateData TODO: remove dependency on models package
 type TemplateData struct {
 	CurrentYear     int
 	Model           any
@@ -16,6 +15,7 @@ type TemplateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
+	UserName        string
 	CSRFToken       string
 }
 

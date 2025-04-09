@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"snippetbox/internal/modules/user/domain"
 	"snippetbox/internal/platform"
 	"snippetbox/internal/platform/database"
 	"snippetbox/internal/ui"
@@ -90,6 +91,7 @@ func (app *Application) NewTemplateData(r *http.Request) *ui.TemplateData {
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.SessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: app.IsAuthenticated(r),
+		UserName:        app.GetCurrentUser(r).Name,
 		CSRFToken:       nosurf.Token(r),
 	}
 }
@@ -116,4 +118,13 @@ func (app *Application) IsAuthenticated(r *http.Request) bool {
 	isAuthenticated, ok := r.Context().Value(platform.IsAuthenticatedContextKey).(bool)
 
 	return ok && isAuthenticated
+}
+
+func (app *Application) GetCurrentUser(r *http.Request) *domain.UserModel {
+	user, ok := r.Context().Value(platform.UserContextKey).(*domain.UserModel)
+
+	if !ok {
+		return &domain.UserModel{}
+	}
+	return user
 }
