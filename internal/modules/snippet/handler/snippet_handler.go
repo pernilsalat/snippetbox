@@ -8,7 +8,7 @@ import (
 	"snippetbox/internal/modules/snippet/service"
 	"snippetbox/internal/platform/database"
 	"snippetbox/internal/platform/web"
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 	"strconv"
 )
 

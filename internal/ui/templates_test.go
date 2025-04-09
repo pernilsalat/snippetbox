@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"snippetbox/internal/assert"
+	"snippetbox/pkg/assert"
 	"testing"
 	"time"
 )

@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 	"time"
 )
 
@@ -23,4 +23,11 @@ type UserLoginForm struct {
 	Email               string `form:"email"`
 	Password            string `form:"password"`
 	validator.Validator `form:"-"`
+}
+
+type UserPasswordUpdateForm struct {
+	CurrentPassword         string `form:"currentPassword"`
+	NewPassword             string `form:"newPassword"`
+	NewPasswordConfirmation string `form:"newPasswordConfirmation"`
+	validator.Validator     `form:"-"`
 }

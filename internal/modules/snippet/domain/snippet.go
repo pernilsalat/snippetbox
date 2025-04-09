@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 	"time"
 )
 

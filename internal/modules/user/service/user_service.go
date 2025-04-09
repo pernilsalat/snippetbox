@@ -4,7 +4,7 @@ import (
 	"errors"
 	"snippetbox/internal/modules/user/domain"
 	"snippetbox/internal/modules/user/repository"
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 )
 
 type User struct {
@@ -57,4 +57,26 @@ func (s *User) Authenticate(form *domain.UserLoginForm) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (s *User) PasswordUpdate(form *domain.UserPasswordUpdateForm, userId int) error {
+	form.CheckField(validator.NotBlank(form.CurrentPassword), "currentPassword", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.NewPassword), "newPassword", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.NewPassword, 8), "newPassword", "This field must be at least 8 characters long")
+	form.CheckField(validator.NotBlank(form.NewPasswordConfirmation), "newPasswordConfirmation", "This field cannot be blank")
+	form.CheckField(validator.Equal(form.NewPassword, form.NewPasswordConfirmation), "newPasswordConfirmation", "Passwords do not match")
+
+	if !form.Valid() {
+		return validator.ErrInvalidForm
+	}
+
+	err := s.repo.UpdatePassword(userId, form.CurrentPassword, form.NewPassword)
+	if errors.Is(err, repository.ErrInvalidCredentials) {
+		form.AddFieldError("currentPassword", "Current password is incorrect")
+		return validator.ErrInvalidForm
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -22,4 +22,6 @@ func InitRoutes(app *web.Application) {
 	protected := web.Protected(app)
 	app.Router.Handler(http.MethodPost, "/user/logout", protected.ThenFunc(uh.UserLogoutPost))
 	app.Router.Handler(http.MethodGet, "/user/view", protected.ThenFunc(uh.UserView))
+	app.Router.Handler(http.MethodGet, "/user/password/update", protected.ThenFunc(uh.UserPasswordUpdateView))
+	app.Router.Handler(http.MethodPost, "/user/password/update", protected.ThenFunc(uh.UserPasswordUpdatePost))
 }

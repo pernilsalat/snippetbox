@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"snippetbox/internal/assert"
 	"snippetbox/internal/platform/web"
+	"snippetbox/pkg/assert"
 	"testing"
 )
 

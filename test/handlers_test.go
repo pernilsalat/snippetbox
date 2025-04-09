@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"snippetbox/internal/assert"
 	"snippetbox/internal/modules/ping"
+	"snippetbox/pkg/assert"
 	"testing"
 )
 

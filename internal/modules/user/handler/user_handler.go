@@ -7,7 +7,7 @@ import (
 	"snippetbox/internal/modules/user/repository"
 	"snippetbox/internal/modules/user/service"
 	"snippetbox/internal/platform/web"
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 )
 
 type UserHandler struct {
@@ -108,4 +108,37 @@ func (h *UserHandler) UserView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.app.Render(w, http.StatusOK, "account.tmpl.html", td)
+}
+
+func (h *UserHandler) UserPasswordUpdateView(w http.ResponseWriter, r *http.Request) {
+	td := h.app.NewTemplateData(r)
+	td.Form = domain.UserPasswordUpdateForm{}
+	h.app.Render(w, http.StatusOK, "password.tmpl.html", td)
+}
+
+func (h *UserHandler) UserPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
+	id := h.app.GetCurrentUser(r).Id
+	var form domain.UserPasswordUpdateForm
+	if err := h.app.DecodePostForm(r, &form); err != nil {
+		h.app.ClientError(w, http.StatusBadRequest)
+		return
+	}
+	err := h.service.PasswordUpdate(&form, id)
+	if errors.Is(err, validator.ErrInvalidForm) {
+		td := h.app.NewTemplateData(r)
+		td.Form = form
+		h.app.Render(w, http.StatusUnprocessableEntity, "password.tmpl.html", td)
+		return
+	} else if err != nil {
+		h.app.ServerError(w, err)
+		return
+	}
+
+	err = h.app.SessionManager.RenewToken(r.Context())
+	if err != nil {
+		h.app.ServerError(w, err)
+		return
+	}
+
+	h.app.Render(w, http.StatusSeeOther, "account.tmpl.html", h.app.NewTemplateData(r))
 }

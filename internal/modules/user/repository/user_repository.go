@@ -14,6 +14,7 @@ type IUserRepository interface {
 	Insert(name, email, password string) error
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
+	UpdatePassword(id int, currentPassword, newPassword string) error
 }
 type UserRepository struct {
 	DB database.DB
@@ -87,4 +88,30 @@ func (m *UserRepository) Get(id int) (*domain.UserModel, error) {
 	}
 
 	return u, nil
+}
+
+func (m *UserRepository) UpdatePassword(id int, currentPassword, newPassword string) error {
+	var currentHashedPassword []byte
+	sqlStatementGet := `SELECT hashed_password from users WHERE id = ?`
+	sqlStatementUpdate := `UPDATE users SET hashed_password = ? WHERE id = ?`
+
+	err := m.DB.QueryRow(sqlStatementGet, id).Scan(&currentHashedPassword)
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword(currentHashedPassword, []byte(currentPassword))
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		return ErrInvalidCredentials
+	} else if err != nil {
+		return err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.DB.Exec(sqlStatementUpdate, string(hashedPassword), id)
+
+	return err
 }

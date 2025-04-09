@@ -1,8 +1,8 @@
 package test
 
 import (
-	"snippetbox/internal/assert"
 	"snippetbox/internal/modules/user/repository"
+	"snippetbox/pkg/assert"
 	"testing"
 )
 

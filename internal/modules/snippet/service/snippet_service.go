@@ -3,7 +3,7 @@ package service
 import (
 	"snippetbox/internal/modules/snippet/domain"
 	"snippetbox/internal/modules/snippet/repository"
-	"snippetbox/internal/validator"
+	"snippetbox/pkg/validator"
 )
 
 type Snippet struct {
