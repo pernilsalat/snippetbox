@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"snippetbox/internal/modules/snippet/domain"
-	"snippetbox/internal/modules/snippet/repository"
+	"snippetbox/internal/platform/database"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func (m *SnippetModel) Get(id int) (*domain.SnippetModel, error) {
 	case 1:
 		return mockSnippet, nil
 	default:
-		return nil, repository.ErrNoRecord
+		return nil, database.ErrNoRecord
 	}
 }
 
